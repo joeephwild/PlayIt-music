@@ -54,8 +54,15 @@ contract Spotify {
     }
 
     //a function where user can follow a particular musician of choice
-    function followAnAccount(uint _id) public {}
-
+    function followAnAccount(address _artist, address _listener) public view return(bool) {
+        return followers[_artist][_listener] = true;
+    }
+   
+   //unFollow an account
+   function unfollowAnAccount(address _artist, address _listener) public view return(bool) {
+        return delete followers[_artist][_listener];
+    }
+    
     //create account
     function createAnAccount() public {
         require(registrationFee, "fee has to be have been payed");
