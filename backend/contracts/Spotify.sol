@@ -60,8 +60,9 @@ contract Spotify {
     }
    
    //unFollow an account
-   function unfollowAnAccount(address _artist, address _listener) public view return(bool) {
-        return delete followers[_artist][_listener];
+   function unfollowAnAccount(address _artist, address _listener) public {
+         delete followers[_artist][_listener];
+         followerCount -= 1;
     }
 
     //create account
