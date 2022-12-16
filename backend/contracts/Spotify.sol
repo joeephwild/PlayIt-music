@@ -8,7 +8,7 @@ pragma solidity ^0.8.9;
   * list of function needed in the dapp  
   * 1: Create and manage user accounts ✔
     2: Allow users to upload and share music tracks ✔
-    3: Set prices for tracks and manage payments
+    3: Set prices for tracks and manage payments✔
     4: Track playback and listening statistics
   */
 contract Spotify {
@@ -34,26 +34,28 @@ contract Spotify {
     }
 
     ArtistStruct[] artist;
-    //Music[] music;
+    Music[] music;
     mapping(address => mapping(address => bool)) public followers;
     mapping(uint256 => Music) public musics;
-    //mapping(uint256 => Music) public music;
     mapping(address => ArtistStruct) public artists;
 
     uint256 public numberOfMusic = 0;
-    uint256 musicCount;
+    //uint256 musicCount;
     uint256 numberOfFollowers;
+    //to keep track of number of supporters
     uint256 numberOfSupporter;
+    //to keep track of plays
+    uint256 numberOfPlays;
 
+   //create an accouunt
     function createAnAccount(
         string memory _name,
-        address _owner,
         string memory _image,
         string memory _coverImage
     ) public {
-        ArtistStruct storage creator = artists[_owner];
+        ArtistStruct storage creator = artists[msg.sender];
         creator.name = _name;
-        creator.owner = _owner;
+        creator.owner = msg.sender;
         creator.image = _image;
         creator.coverImage = _coverImage;
         creator.listener = numberOfFollowers;
@@ -61,10 +63,13 @@ contract Spotify {
         artist.push(creator);
     }
 
+    //get all artist
     function getArtist() public view returns (ArtistStruct[] memory) {
         return artist;
     }
 
+
+   //update a particular section of an account 
     function updateAccount(
         address _owner,
         string memory data,
@@ -84,6 +89,7 @@ contract Spotify {
         }
     }
 
+    //delete an account
     function deleteAccount(address _pubkey) external {
         ArtistStruct storage creator = artists[_pubkey];
         require(
@@ -93,6 +99,7 @@ contract Spotify {
         delete artists[_pubkey];
     }
 
+   //upload a new music
     function uploadMusic(
         uint256 _owner,
         string memory _title,
@@ -107,24 +114,29 @@ contract Spotify {
       playlist.musicFile = _file;
       playlist.image = _image;
       playlist.owner = msg.sender;
+      music.push(playlist);
       numberOfMusic++;
       return numberOfMusic - 1;
     }
 
+   //follow abd account
     function followAnAccount(address _artist, address _listener) public {
          followers[_artist][_listener] = true;
          numberOfFollowers += 1;
     }
 
+   //unfollow an account
     function unfollowAnAccount(address _artist, address _listener) public {
          delete followers[_artist][_listener];
          numberOfFollowers -= 1;
     }
 
+   //get number of followers
     function getFollowerCount() public view returns (uint256) {
         return numberOfFollowers;
     }
  
+    //donate to a particular music
     function donateToMusic(uint256 _id) external payable {
         uint256 amount = msg.value;
 
@@ -140,6 +152,8 @@ contract Spotify {
        }
     }
 
+
+    //Get every list of music in the blockchain
     function getAllMusic() public view returns(Music[] memory){
         Music[] memory allMusic = new Music[](numberOfMusic);
 
@@ -151,59 +165,12 @@ contract Spotify {
         return allMusic;
     }
 
+    //fetch every supporters of a particular music
+     function getAllSupporters(uint256 _id) public view returns(address[] memory, uint256[] memory){
+        return (musics[_id].donators, musics[_id].trackPrice);
+     }
+
     /**
-      
-
-    struct Music {
-        string title;
-        string musicUrl;
-        address owner;
-    }
-
-    struct ArtistStruct {
-        string name;
-        string image;
-        address artist;
-        uint followerCount;
-        uint music;
-    }
-
-    struct userStruct {
-        string name;
-        address user;
-    }
-
- //holds the different account type a user 
- //can create an account has which will be used later for account creation
-    enum AccountType {
-        Artist,
-        Listener
-    }
-
-  //constructor to hold the fee a user has to pay
-    constructor() public {
-    }
-
-    //an array of artist
-    ArtistStruct[] artistArray;
-    Music[] musicArray;
-
-    
-   
-
-    //function to list a number of music to an account
-    function listMusic(string memory name, string memory musicFile) public {
-        require(registrationFee, "fees has to have been payed");
-        musicCount += 1;
-        Music storage newMusic = Music({
-            title: name,
-            music: musicFile,
-            owner: msg.sender
-        })
-        musicCount ++;
-        musicMapping[musicCount] = newMusic;
-        musicArray.push(newMusic);
-    }
       // Define a mapping to store the price of each track
      mapping (bytes32 => uint) public trackPrices;
 
